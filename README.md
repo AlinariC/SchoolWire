@@ -22,6 +22,28 @@ SchoolWire is a lightweight notification portal for school districts. It pulls c
    curl http://localhost:3000/health
    ```
 
+## One-step install on Fedora (with Apache)
+For a full setup behind Apache on Fedora, run the installer script and answer the prompts:
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+The script will:
+- Install Node.js, npm, git, and Apache (`httpd`) via `dnf`.
+- Prompt for all SchoolWire environment variables (Synergy SFTP/API, Twilio, SMTP2GO, Entra ID, and the app port) and write `.env`.
+- Ask for the public FQDN and generate `/etc/httpd/conf.d/schoolwire.conf` with proxying to the Node.js app.
+- Enable SELinux proxying for Apache, open HTTP in `firewalld` when available, and enable/reload `httpd`.
+- Install npm dependencies, create/enable a `schoolwire.service` systemd unit, and start the app.
+
+After completion, verify with:
+
+```bash
+sudo systemctl status schoolwire.service
+curl http://<your-fqdn-or-host>/health
+```
+
 ## Deploy on an existing LAMP server
 You can host SchoolWire alongside an existing Apache/PHP/MySQL stack by running the Node.js app behind Apache. The steps below assume Ubuntu/Debian and that you already have Apache (with `mod_proxy` and `mod_proxy_http`) and MySQL installed.
 
