@@ -1,0 +1,18 @@
+{
+  "name": "schoolwire",
+  "version": "0.1.0",
+  "description": "Notification system for schools with Synergy data intake and multi-channel messaging.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "uuid": "^9.0.1"
+  },
+  "type": "module"
+}
