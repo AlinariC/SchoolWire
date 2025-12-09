@@ -22,6 +22,61 @@ SchoolWire is a lightweight notification portal for school districts. It pulls c
    curl http://localhost:3000/health
    ```
 
+## Deploy on an existing LAMP server
+You can host SchoolWire alongside an existing Apache/PHP/MySQL stack by running the Node.js app behind Apache. The steps below assume Ubuntu/Debian and that you already have Apache (with `mod_proxy` and `mod_proxy_http`) and MySQL installed.
+
+1. Install Node.js 18+ and git:
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   sudo apt-get install -y nodejs git
+   ```
+
+2. Clone the app (adjust path as needed):
+   ```bash
+   sudo mkdir -p /var/www/schoolwire
+   sudo chown $(whoami) /var/www/schoolwire
+   git clone https://github.com/your-org/SchoolWire.git /var/www/schoolwire
+   cd /var/www/schoolwire
+   ```
+
+3. Configure environment (create `.env`):
+   ```bash
+   cat > .env <<'EOF'
+   PORT=3000
+   # Synergy/Twilio/SMTP2GO/Entra variables go here
+   EOF
+   ```
+   If you plan to connect to MySQL later, add your DSN credentials; by default the app uses in-memory storage.
+
+4. Install dependencies and start the service:
+   ```bash
+   npm install
+   npm start
+   ```
+   You should see the server listening on port 3000. For long-running use, wrap this in a process manager such as `pm2` or a `systemd` unit.
+
+5. Add an Apache reverse proxy so users can reach the app on your existing site (replace `schoolwire.example.org` with your host):
+   ```apache
+   <VirtualHost *:80>
+     ServerName schoolwire.example.org
+     ProxyPreserveHost On
+     ProxyPass / http://127.0.0.1:3000/
+     ProxyPassReverse / http://127.0.0.1:3000/
+   </VirtualHost>
+   ```
+   Enable the site and reload Apache:
+   ```bash
+   sudo a2enmod proxy proxy_http
+   sudo a2ensite schoolwire.conf
+   sudo systemctl reload apache2
+   ```
+
+6. Verify through Apache:
+   ```bash
+   curl -I http://schoolwire.example.org/health
+   ```
+   You should receive `200 OK`. If you use HTTPS, add TLS directives (or run `certbot --apache`) in the VirtualHost.
+
 ## Configuration
 Environment variables you will need in a real deployment:
 - `PORT`: Server port (defaults to `3000`).
